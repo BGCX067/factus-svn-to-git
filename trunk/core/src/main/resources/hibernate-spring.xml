@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:j2ee="http://www.springframework.org/schema/jee"
+       xmlns:p="http://www.springframework.org/schema/p"
+
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       http://www.springframework.org/schema/util  http://www.springframework.org/schema/util/spring-util-2.5.xsd
+       http://www.springframework.org/schema/jee   http://www.springframework.org/schema/jee/spring-jee-2.5.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+       ">
+
+  <!-- ========================= GENERAL DEFINITIONS ========================= -->
+
+  <!-- Configurer that replaces ${...} placeholders with values from properties files -->
+  <!-- (in this case, mail and JDBC related properties) -->
+  <!--
+    Moved to xxx-servlet.xml
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+      <property name="locations">
+        <list>
+          <value>WEB-INF/jdbc.properties</value>
+        </list>
+      </property>
+    </bean>
+  -->
+  <bean id="mainPropertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="locations">
+      <list>
+        <value>classpath:jdbc.properties</value>
+        <value>classpath:fetch.properties</value>
+      </list>
+    </property>
+  </bean>
+
+  <!--
+    <bean id="mainDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+      <property name="driverClassName" value="${jdbc.driverClassName}"/>
+      <property name="url" value="${jdbc.url}"/>
+      <property name="username" value="${jdbc.username}"/>
+      <property name="password" value="${jdbc.password}"/>
+    </bean>
+  -->
+  <bean id="mainDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <property name="driverClassName" value="${jdbc.driverClassName}"/>
+    <property name="url" value="${jdbc.url}"/>
+    <property name="username" value="${jdbc.username}"/>
+    <property name="password" value="${jdbc.password}"/>
+  </bean>
+
+  <!--
+    <j2ee:jndi-lookup id="jndiDataSource"
+                jndi-name="java:comp/env/jdbc/cc"
+                cache="true"
+                proxy-interface="javax.sql.DataSource"/>
+  -->
+
+  <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+    <property name="dataSource" ref="mainDataSource"/>
+
+    <!--
+        <property name="annotatedPackages">
+          <list>
+            <value>ru.factus.bo</value>
+          </list>
+        </property>
+    -->
+    <property name="annotatedClasses">
+      <list>
+        <value>ru.factus.bo.fetch.Feed</value>
+        <value>ru.factus.bo.fetch.FetchedData</value>
+
+        <value>ru.factus.bo.components.AbstractComponent</value>
+        <value>ru.factus.bo.components.Organization</value>
+        <value>ru.factus.bo.components.Post</value>
+        <value>ru.factus.bo.components.Person</value>
+
+        <value>ru.factus.bo.Relation</value>
+
+        <value>ru.factus.bo.RelationStore</value>
+      </list>
+    </property>
+    <!--<property name="schemaUpdate" value="true"/>-->
+
+    <property name="hibernateProperties">
+      <props>
+        <prop key="hibernate.dialect">${hibernate.dialect}</prop>
+        <!--<prop key="hibernate.default_schema">${hibernate.default_schema}</prop>-->
+        <prop key="hibernate.hbm2ddl.auto">update</prop>
+
+        <prop key="hibernate.show_sql">true</prop>
+
+        <prop key="hibernate.max_fetch_depth">0</prop>
+        <prop key="hibernate.order_updates">true</prop>
+        <prop key="hibernate.order_inserts">true</prop>
+        <prop key="hibernate.default_batch_fetch_size">8</prop>
+        <!--<prop key="hibernate.use_identifer_rollback">true</prop>-->
+
+        <prop key="hibernate.jdbc.fetch_size">50</prop>
+        <prop key="hibernate.jdbc.batch_size">50</prop>
+
+        <prop key="hibernate.cache.use_query_cache">true</prop>
+        <prop key="hibernate.cache.use_second_level_cache">false</prop>
+        <prop key="hibernate.cache.provider_class">org.hibernate.cache.EhCacheProvider</prop>
+
+      </props>
+    </property>
+
+  </bean>
+
+  <bean id="mainTxManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+    <property name="sessionFactory" ref="sessionFactory"/>
+  </bean>
+
+  <aop:config>
+    <aop:pointcut id="serviceMethods" expression="execution(* ru.factus.services.*.*(..))"/>
+    <aop:advisor advice-ref="txAdvice" pointcut-ref="serviceMethods"/>
+  </aop:config>
+
+  <tx:advice id="txAdvice" transaction-manager="mainTxManager">
+    <tx:attributes>
+      <tx:method name="create*" propagation="REQUIRED"/>
+      <tx:method name="store*" propagation="REQUIRED"/>
+      <tx:method name="generate*" propagation="REQUIRED"/>
+      <tx:method name="registration*" propagation="REQUIRED"/>
+      <tx:method name="register*" propagation="REQUIRED"/>
+      <tx:method name="persist*" propagation="REQUIRED"/>
+      <tx:method name="make*" propagation="REQUIRED"/>
+      <tx:method name="set*" propagation="REQUIRED"/>
+      <tx:method name="save*" propagation="REQUIRED"/>
+      <tx:method name="start*" propagation="REQUIRED"/>
+      <tx:method name="import*" propagation="REQUIRED"/>
+      <tx:method name="delete*" propagation="REQUIRES_NEW"/>
+      <tx:method name="getOrCreate*" propagation="REQUIRED"/>
+      <tx:method name="add*" propagation="REQUIRED"/>
+      <tx:method name="*" propagation="SUPPORTS" read-only="true"/>
+    </tx:attributes>
+  </tx:advice>
+
+  <bean id="daoFactory" class="ru.factus.dao.DAOFactory" p:sessionFactory-ref="sessionFactory"/>
+  <bean id="genericDao" class="ru.factus.dao.GenericDAOImpl"
+        abstract="true"
+        p:daoFactory-ref="daoFactory" p:factory-ref="sessionFactory"/>
+</beans>

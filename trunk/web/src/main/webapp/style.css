@@ -1,0 +1,154 @@
+body, form{
+  padding: 0;
+  margin: 0;
+}
+
+body{
+  background: #fff;
+}
+
+body, div, p, td{
+  font-family: Arial, sans-serif;
+  font-size: 11px
+}
+
+#main_layout{
+  width: 100%;
+  height: 100%;
+}
+
+#head {
+  padding-left: 10px;
+  height: 60px;
+  border-bottom: 1px solid #cccccc;
+}
+
+#left_column{
+  width: 15%;
+  border-right: 1px solid #cccccc;
+  vertical-align: top;
+}
+
+#right_column{
+  width: 85%;
+  vertical-align: top;
+  padding: 15px;
+}
+
+#right_column a{
+  color: #659CD0;
+  font-size: 11px;
+}
+
+#right_column a:hover{
+  text-decoration: none;
+}
+
+#top {
+  margin: 2px;
+}
+
+h1{
+  color: #666;
+}
+
+#top h1{
+  padding: 0;
+  color: #659CD0;
+  font-size: 16px;
+  margin: 3px 0 0 10px;
+  
+}
+
+#top b{
+  font-size: 9px;
+}
+
+#top ul{
+  list-style: square;
+  margin-top: 2px;
+  margin-bottom: 4px;
+}
+
+#top li{
+  padding: 2px 0 2px 0;
+}
+
+
+#top a{
+  text-transform: capitalize;
+  color: #555;
+  font-family: Arial, sans-serif;
+  padding: 1px 2px 1px 2px;
+  font-size: 11px;
+  text-decoration: none;
+}
+
+#tags a, a.persons, a.orgs, a.posts, a.feedId{
+  margin-right: 3px;
+  font-family: Arial, sans-serif;
+  padding: 1px 3px 1px 3px;
+  font-size: 11px;
+  text-decoration: none;
+  text-transform: capitalize;
+  background: #cc0000;
+  color: #fff !important;
+  -moz-border-radius: 3px;
+}
+
+a.orgs{
+  background: #0066ff;
+}
+
+a.posts{
+  background: #339900;
+}
+
+a.feedId{
+  background: #ffcc00;
+}
+
+#top span{
+  font-family: Tahoma, sans-serif;
+  font-size: 9px;  
+  color: #555;
+}
+
+/*#top a:hover{
+  background: #659CD0;
+  color: #fff;
+}
+
+#top a:hover i{
+  display: inline ;
+}
+
+#top a i{
+  display: none;
+}*/
+
+.phrase {
+  margin-bottom: 15px;
+  font-size: 13px;
+  font-family: Tahoma, sans-serif;
+}
+
+h2{
+  font-size: 13px;
+  color: #444;
+  padding: 0;
+  margin: 0;
+}
+
+.more {
+  color: #659CD0 !important;
+  font-size: 9px !important;
+  text-decoration: none;
+  padding: 2px;
+  -moz-border-radius: 3px;
+}
+
+.more:hover {
+  color: #fff !important;
+  background: #659CD0;
+}

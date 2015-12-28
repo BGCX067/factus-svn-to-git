@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+
+  <!--
+    <bean id="fetchPropertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+      <property name="locations">
+        <list>
+          <value>classpath:fetch.properties</value>
+        </list>
+      </property>
+    </bean>
+  -->
+
+  <bean id="solrServer" class="ru.factus.SolrServerBean">
+    <constructor-arg index="0" value="http://jupiter:8085/solr"/>
+  </bean>
+
+  <bean id="factDAO" class="ru.factus.dao.fetch.impl.FactDAOImpl" parent="genericDao"/>
+  <bean id="feedDAO" class="ru.factus.dao.fetch.impl.FeedDAOImpl" parent="genericDao"/>
+  <bean id="fetchedDataDAO" class="ru.factus.dao.fetch.impl.FetchedDataDAOImpl" parent="genericDao"/>
+
+  <!--<bean id="fetcherService" class="ru.factus.services.impl.FetcherServiceImpl"
+        p:feedDAO-ref="feedDAO"
+        p:fetchedDAO-ref="fetchedDataDAO"
+      />-->
+
+  <context:component-scan base-package="ru.factus.services" />
+
+
+  <!--<bean id="fetcherService" class="ru.factus.services.impl.FetcherServiceImpl"
+        p:feedDAO-ref="feedDAO"
+        p:fetchedDAO-ref="fetchedDataDAO"
+      />-->
+
+  <bean id="configuration" class="ru.factus.FetcherConfiguration"
+        p:fetcherService-ref="fetcherService"
+        p:cacheStoreDir="${fetcher.feed.cache.dir}"
+        p:pollingPeriod="${fetcher.polling.period}"
+        p:executeCount="${fetcher.execute.count}" />
+
+  <bean id="jobDetail" class="org.springframework.scheduling.timer.MethodInvokingTimerTaskFactoryBean">
+    <property name="targetObject" ref="factService"/>
+    <property name="targetMethod" value="rebuildIndex"/>
+  </bean>
+
+  <bean id="scheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
+    <property name="delay" value="6000"/>
+    <property name="period" value="1000000"/>
+    <property name="timerTask" ref="jobDetail"/>
+  </bean>
+
+  <bean id="timerFactory" class="org.springframework.scheduling.timer.TimerFactoryBean">
+    <property name="scheduledTimerTasks">
+      <list>
+        <ref bean="scheduledTask"/>
+        <ref bean="scheduledTaskFetcher"/>        
+      </list>
+    </property>
+  </bean>
+
+    <bean id="fetcher" class="ru.factus.utils.Fetcher"
+          p:service-ref="fetcherService"
+          p:executeCount="1000000000"/>
+
+  <bean id="scheduledTaskFetcher" class="org.springframework.scheduling.timer.ScheduledTimerTask">
+      <property name="delay" value="10000" />
+      <property name="period" value="60000" />
+      <property name="timerTask" ref="fetcher" />
+  </bean>
+
+  <!--
+  <bean id="timerFactory" class="org.springframework.scheduling.timer.TimerFactoryBean">
+      <property name="scheduledTimerTasks">
+          <list>
+              <ref bean="scheduledTask" />
+          </list>
+      </property>
+  </bean>-->
+
+
+</beans>
